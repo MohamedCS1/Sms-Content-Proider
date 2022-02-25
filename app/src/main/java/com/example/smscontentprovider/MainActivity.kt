@@ -6,7 +6,9 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import android.provider.Telephony
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -22,7 +24,9 @@ class MainActivity : AppCompatActivity() {
        }
        else
        {
-           TODO()
+           Thread(Runnable {
+            readSms()
+           }).start()
        }
     }
 
@@ -39,4 +43,30 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)        }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
-}
+    private fun readSms()
+    {
+        val numberCol = Telephony.TextBasedSmsColumns.ADDRESS
+        val textCol = Telephony.TextBasedSmsColumns.BODY
+        val typeCol = Telephony.TextBasedSmsColumns.TYPE
+
+        val projection = arrayOf(numberCol, textCol, typeCol)
+
+        val cursor = contentResolver.query(
+            Telephony.Sms.CONTENT_URI,
+            projection, null, null, null
+        )
+
+        val numberColIdx = cursor!!.getColumnIndex(numberCol)
+        val textColIdx = cursor.getColumnIndex(textCol)
+        val typeColIdx = cursor.getColumnIndex(typeCol)
+
+        while (cursor.moveToNext()) {
+            val number = cursor.getString(numberColIdx)
+            val text = cursor.getString(textColIdx)
+            val type = cursor.getString(typeColIdx)
+
+            Log.d("Mess", " $text ")
+        }
+
+        cursor.close()
+    }}
