@@ -1,5 +1,6 @@
 package com.example.smscontentprovider
 
+import android.app.UiModeManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -8,15 +9,20 @@ import android.provider.Settings
 import android.provider.Telephony
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+
 
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        var smsarray:ArrayList<String>?
+
+        AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
 
         if (ContextCompat.checkSelfPermission(this , android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED)
         {
@@ -26,7 +32,17 @@ class MainActivity : AppCompatActivity() {
         {
             Thread(Runnable {
 
-              smsarray =readSms()
+                val smsadapter = SmsAdapter()
+
+                val rv = findViewById<RecyclerView>(R.id.SmsRecyclerView)
+
+                val lm = LinearLayoutManager(this)
+
+                rv.layoutManager = lm
+
+                smsadapter.setList(readSms())
+
+                rv.adapter = smsadapter
 
             }).start()
         }
