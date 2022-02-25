@@ -2,13 +2,11 @@ package com.example.smscontentprovider
 
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import android.provider.Telephony
 import android.util.Log
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -18,16 +16,20 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-       if (ContextCompat.checkSelfPermission(this , android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED)
-       {
-           ActivityCompat.requestPermissions(this , arrayOf(android.Manifest.permission.READ_SMS) ,11)
-       }
-       else
-       {
-           Thread(Runnable {
-            readSms()
-           }).start()
-       }
+        var smsarray:ArrayList<String>?
+
+        if (ContextCompat.checkSelfPermission(this , android.Manifest.permission.READ_SMS) != PackageManager.PERMISSION_GRANTED)
+        {
+            ActivityCompat.requestPermissions(this , arrayOf(android.Manifest.permission.READ_SMS) ,11)
+        }
+        else
+        {
+            Thread(Runnable {
+
+              smsarray =readSms()
+
+            }).start()
+        }
     }
 
     override fun onRequestPermissionsResult(
@@ -43,13 +45,14 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)        }
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
     }
-    private fun readSms()
-    {
+    private fun readSms(): ArrayList<String> {
         val numberCol = Telephony.TextBasedSmsColumns.ADDRESS
         val textCol = Telephony.TextBasedSmsColumns.BODY
         val typeCol = Telephony.TextBasedSmsColumns.TYPE
 
         val projection = arrayOf(numberCol, textCol, typeCol)
+
+        val arraysms = arrayListOf<String>()
 
         val cursor = contentResolver.query(
             Telephony.Sms.CONTENT_URI,
@@ -65,8 +68,11 @@ class MainActivity : AppCompatActivity() {
             val text = cursor.getString(textColIdx)
             val type = cursor.getString(typeColIdx)
 
+            arraysms.add(text)
+
             Log.d("Mess", " $text ")
         }
-
         cursor.close()
+
+        return arraysms
     }}
